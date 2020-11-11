@@ -77,10 +77,21 @@ class QnoteroResults(QListWidget):
                 path = os.path.normpath(path)
                 os.startfile(path)
             else:  # linux variants
+                # QUICKFIX (A. Dareau) ----------------------------------------
+                # for some reason, the "fulltext" attribute starts
+                # with 'attachments:', followed by the path relative to the
+                # current user home folder (in my case at least). I fix
+                # that by replacing 'attachments:' by the current user home
+                home = os.path.expanduser('~')
+                path = path.replace('attachments:', '')
+                path = os.path.join(home, path)
+                # --------------------------------------------------------------
                 subprocess.call(('xdg-open', path))
             print("qnoteroResults.DoubleClicked(): file opened")
         except Exception as exc:
             print("qnoteroResults.DoubleClicked(): failed to open file or URL, sorry... %s" % exc)
+
+
 
     def keyPressEvent(self, e):
 
