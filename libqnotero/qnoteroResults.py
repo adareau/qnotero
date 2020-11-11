@@ -107,6 +107,11 @@ class QnoteroResults(QListWidget):
             self.qnotero.ui.lineEditQuery.selectAll()
             self.qnotero.ui.lineEditQuery.setFocus()
             return
+        # AD : pressing 'Enter' opens the item
+        elif (e.key() == Qt.Key_Return):
+            item = self.currentItem()
+            self.DoubleClicked(item)
+            return
         QListWidget.keyPressEvent(self, e)
 
     def Clicked(self, item):
