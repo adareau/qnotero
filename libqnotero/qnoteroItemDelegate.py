@@ -1,27 +1,28 @@
 #-*- coding:utf-8 -*-
 
-"""
-This file is part of qnotero.
+#  This file is part of Qnotero.
+#
+#      Qnotero is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      Qnotero is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with Qnotero.  If not, see <https://www.gnu.org/licenses/>.
+#      Copyright (c) 2019 E. Albiter
 
-qnotero is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+#
 
-qnotero is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with qnotero.  If not, see <http://www.gnu.org/licenses/>.
-"""
-
-from libqnotero.qt.QtGui import QStyledItemDelegate, QApplication, QStyle
-from libqnotero.qt.QtGui import QPen, QPalette, QFont, QFontMetrics
+from libqnotero.qt.QtGui import QStyledItemDelegate, QStyle, QTextDocument
+from libqnotero.qt.QtGui import QFont, QFontMetrics, QAbstractTextDocumentLayout
 from libqnotero.qt.QtCore import Qt, QRect, QSize
-from libqnotero.config import getConfig
 from libzotero.zotero_item import cache as zoteroCache
+
 
 class QnoteroItemDelegate(QStyledItemDelegate):
 
@@ -90,8 +91,8 @@ class QnoteroItemDelegate(QStyledItemDelegate):
 		record = model.data(index)
 		text = record
 		zoteroItem = zoteroCache[text]
-		l = zoteroItem.full_format().split(u"\n")
-		if zoteroItem.fulltext == None:
+
+		if zoteroItem.fulltext is None:
 			pixmap = self.noPdfPixmap
 		else:
 			pixmap = self.pdfPixmap
@@ -102,7 +103,7 @@ class QnoteroItemDelegate(QStyledItemDelegate):
 			background = self.palette.Highlight
 			foreground = self.palette.HighlightedText
 			_note = zoteroItem.get_note()
-			if _note != None:
+			if _note is not None:
 				self.qnotero.showNoteHint()
 			else:
 				self.qnotero.hideNoteHint()
@@ -115,7 +116,7 @@ class QnoteroItemDelegate(QStyledItemDelegate):
 			foreground = self.palette.WindowText
 
 		# Draw the frame
-		_rect = option.rect.adjusted(self._margin, self._margin, \
+		_rect = option.rect.adjusted(self._margin, self._margin,
 			-2*self._margin, -self._margin)
 		pen = painter.pen()
 		pen.setColor(self.palette.color(background))
@@ -136,17 +137,18 @@ class QnoteroItemDelegate(QStyledItemDelegate):
 		painter.drawPixmap(_rect, pixmap)
 
 		# Draw the text
-		_rect = option.rect.adjusted(self.pixmapSize+self.dy, 0.5*self.dy, \
-			-self.dy, 0)
+		painter.save()
+		_rect = option.rect.adjusted(self.pixmapSize+0.5*self.dy, 0.5*self.dy,
+									 -self.dy, 0)
 
-		f = [self.tagFont, self.italicFont, self.regularFont, \
-			self.boldFont]
-		l.reverse()
-		while len(l) > 0:
-			s = l.pop()
-			if len(f) > 0:
-				painter.setFont(f.pop())
-			painter.drawText(_rect, Qt.AlignLeft, s)
-			_rect = _rect.adjusted(0, self.dy, 0, 0)
-
+		f = [self.tagFont, self.italicFont, self.regularFont,
+			 self.boldFont]
+		itemText = zoteroItem.full_formatHTML()
+		textRenderer = QTextDocument()
+		context = QAbstractTextDocumentLayout.PaintContext()
+		textRenderer.setHtml(itemText)
+		painter.translate(_rect.topLeft())
+		textRenderer.documentLayout().draw(painter, context)
+		_rect = _rect.adjusted(0, self.dy, 0, 0)
+		painter.restore()
 

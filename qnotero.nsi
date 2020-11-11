@@ -16,7 +16,7 @@
 ; USAGE
 ; -----
 ; This script assumes that the binary is located in
-; 	C:\Users\Dévélõpe®\Documents\gît\Qnotero\dist
+; 	E:\PycharmProjects\qnotero\build\exe.win-amd64-3.8
 ;
 ; The extension FileAssociation.nsh must be installed. This can be
 ; done by downloading the script from the link below and copying it
@@ -25,26 +25,26 @@
 ; For each new release, adjust the PRODUCT_VERSION as follows:
 ; 	version-win32-package#
 
-; After compilation, rename the .exe file to (e.g.)
-; 	qnotero_{PRODUCT_VERSION}.exe
 
-; This script must be ANSI encoded.
+; Build Unicode installer
+Unicode True
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Qnotero"
-!define PRODUCT_VERSION "1.0.0-win32-1"
-!define PRODUCT_PUBLISHER "Sebastiaan Mathot"
-!define PRODUCT_WEB_SITE "http://www.cogsci.nl/qnotero"
+!define PRODUCT_VERSION "2.3.0"
+!define PRODUCT_PUBLISHER "E. Albiter"
+!define PRODUCT_WEB_SITE "https://github.com/ealbiter/qnotero"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
+!define PRODUCT_BUILD_DIRECTORY "E:\PycharmProjects\qnotero\build\exe.win-amd64-3.8"
+!define PRODUCT_RESOURCES_DIRECTORY "E:\PycharmProjects\qnotero\resources"
 
 ; MUI 1.67 compatible ------
-!include "MUI.nsh"
-!include "FileAssociation.nsh"
+!include "MUI2.nsh"
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "C:\Users\Dévélõpe®\Documents\gît\Qnotero\data\qnotero.ico"
+!define MUI_ICON "${PRODUCT_RESOURCES_DIRECTORY}\Windows\qnotero.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
 ; Welcome page
@@ -66,22 +66,21 @@
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "qnotero_X-win32-X.exe"
-InstallDir "$PROGRAMFILES\Qnotero"
+OutFile "build\setup-qnotero-${PRODUCT_VERSION}.exe"
+InstallDir "$PROGRAMFILES64\Qnotero"
 ShowInstDetails hide
 ShowUnInstDetails hide
 
 Section "Qnotero" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite try
-  File /r "C:\Users\Dévélõpe®\Documents\gît\Qnotero\dist\*.*"
+  File /r "${PRODUCT_BUILD_DIRECTORY}\*.*"
+  File "${PRODUCT_BUILD_DIRECTORY}\lib\PyQt5\VCRUNTIME140.dll"
 SectionEnd
 
 Section -AdditionalIcons
-  WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   CreateDirectory "$SMPROGRAMS\Qnotero"
-  CreateShortCut "$SMPROGRAMS\Qnotero\Qnotero.lnk" "$INSTDIR\qnotero.exe" "" "$INSTDIR\data\qnotero.ico"
-  CreateShortCut "$SMPROGRAMS\Qnotero\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
+  CreateShortCut "$SMPROGRAMS\Qnotero\Qnotero.lnk" "$INSTDIR\qnotero.exe" "" "$INSTDIR\qnotero.exe" 0
   CreateShortCut "$SMPROGRAMS\Qnotero\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
@@ -106,8 +105,6 @@ FunctionEnd
 
 Section Uninstall
   Delete "$SMPROGRAMS\Qnotero\Qnotero.lnk"
-  Delete "$SMPROGRAMS\Qnotero\Qnotero (runtime).lnk"
-  Delete "$SMPROGRAMS\Qnotero\Website.lnk"
   Delete "$SMPROGRAMS\Qnotero\Uninstall.lnk"
   RMDir "$SMPROGRAMS\Qnotero"
   RMDir /r "$INSTDIR"  

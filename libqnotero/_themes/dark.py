@@ -1,5 +1,3 @@
-#-*- coding:utf-8 -*-
-
 #  This file is part of Qnotero.
 #
 #      Qnotero is free software: you can redistribute it and/or modify
@@ -18,8 +16,21 @@
 
 #
 
-from libqnotero import qt
-if qt.pyqt == 5:
-	from PyQt5.uic import *
-else:
-	from PyQt4.uic import *
+from libqnotero._themes.light import Light
+import platform
+import sys
+
+
+class Dark(Light):
+
+	"""The Default theme with a window frame"""
+	
+	def __init__(self, qnotero):
+	
+		Light.__init__(self, qnotero)
+
+	def themeFolder(self):
+		if platform.system() == 'Darwin' and hasattr(sys, 'frozen'):
+			return 'themes/dark'
+		else:
+			return 'dark'
