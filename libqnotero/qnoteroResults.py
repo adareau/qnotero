@@ -162,9 +162,9 @@ class QnoteroResults(QListWidget):
                 path = os.path.join(home, path)
                 # if there is already a xournal file : open it
                 if os.path.isfile(path + '.xopp'):
-                    subprocess.call(('xournalpp', path + '.xopp'))
+                    subprocess.Popen(['/usr/bin/xournalpp', path + '.xopp'])
                 else:
-                    subprocess.call(('xournalpp', path))
+                    subprocess.Popen(['/usr/bin/xournalpp', path])
             print("qnoteroResults.OpenXournalpp(): file opened")
         except Exception as exc:
             print("qnoteroResults.OpenXournalpp(): failed to open file, sorry... %s" % exc)
