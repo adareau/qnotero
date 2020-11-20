@@ -6,3 +6,4 @@ build
 releases
 /Output/
 *.sublime-*
+nohup.out
