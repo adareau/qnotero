@@ -119,6 +119,13 @@ class QnoteroResults(QListWidget):
             item = self.currentItem()
             self.OpenXournalpp(item)
             return
+
+        # AD : pressing 'm' starts writing an email with the pdf attached
+        elif (e.key() == Qt.Key_M):
+            item = self.currentItem()
+            self.SendByMail(item)
+            return
+
         QListWidget.keyPressEvent(self, e)
 
 
@@ -169,6 +176,52 @@ class QnoteroResults(QListWidget):
         except Exception as exc:
             print("qnoteroResults.OpenXournalpp(): failed to open file, sorry... %s" % exc)
 
+
+    def SendByMail(self, item):
+        """
+        Start writing an email with the pdf attached
+
+        Arguments:
+        item -- a qnoteroItem
+        """
+        #TODO : refactor with DoubleClicked()
+
+        if item is None or not hasattr(item, "zoteroItem"):
+            return
+        zoteroItem = item.zoteroItem
+        if zoteroItem.fulltext is None and zoteroItem.url is None:
+            return
+        # If there is no a fulltext item : return
+        if len(zoteroItem.fulltext) == 0:
+            return
+        # Only one attachment
+        elif len(zoteroItem.fulltext) == 1:
+            path = zoteroItem.fulltext[0]
+        # If there are more than one
+        else:
+            path, okPressed = QInputDialog.getItem(self, u'Attachments',
+                                                   u'Select attachment to open:', zoteroItem.fulltext, 0, False)
+            if path is None or not okPressed:
+                return
+
+        print("qnoteroResults.SendByMail(): prepare email %s"
+              % path)
+        try:
+            if platform.system() == 'Darwin':  # macOS
+                pass
+            elif platform.system() == 'Windows':  # Windows
+                pass
+            else:  # linux variants
+                home = os.path.expanduser('~')
+                path = path.replace('attachments:', '')
+                path = os.path.join(home, path)
+                # if there is already a xournal file : open it
+                subprocess.Popen(['/usr/bin/xdg-email',
+                                  '--subject', zoteroItem.title,
+                                  '--attach', path])
+            print("qnoteroResults.OpenXournalpp(): file opened")
+        except Exception as exc:
+            print("qnoteroResults.OpenXournalpp(): failed to open file, sorry... %s" % exc)
 
     def Clicked(self, item):
         if item is None or not hasattr(item, "zoteroItem"):
