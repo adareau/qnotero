@@ -41,6 +41,21 @@ class QnoteroResults(QListWidget):
         self.setMouseTracking(True)
 
 
+    def _attached_files_path(self, fpath):
+        """
+        A. DAREAU - QUICKFIX
+        attached files have a path starting with "attachments:"
+        this function parses the name and return a correct path
+        /!\ the path is hard coded for my config...
+        """
+        if fpath.startswith('attachments:'):
+            home = os.path.expanduser('~')
+            attachement_root = os.path.join(home, 'Biblio', 'Articles')
+            fpath = fpath.replace('attachments:', '')
+            fpath = os.path.join(attachement_root, fpath)
+        return fpath
+
+
     def DoubleClicked(self, item):
 
         """
@@ -83,15 +98,14 @@ class QnoteroResults(QListWidget):
                 # with 'attachments:', followed by the path relative to the
                 # current user home folder (in my case at least). I fix
                 # that by replacing 'attachments:' by the current user home
-                home = os.path.expanduser('~')
-                path = path.replace('attachments:', '')
-                path = os.path.join(home, path)
+                path = self._attached_files_path(path)
                 # --------------------------------------------------------------
                 subprocess.call(('xdg-open', path))
             print("qnoteroResults.DoubleClicked(): file opened")
         except Exception as exc:
             print("qnoteroResults.DoubleClicked(): failed to open file or URL, sorry... %s" % exc)
 
+        self.qnotero.popDown()
 
 
     def keyPressEvent(self, e):
@@ -164,9 +178,7 @@ class QnoteroResults(QListWidget):
             elif platform.system() == 'Windows':  # Windows
                 pass
             else:  # linux variants
-                home = os.path.expanduser('~')
-                path = path.replace('attachments:', '')
-                path = os.path.join(home, path)
+                path = self._attached_files_path(path)
                 # if there is already a xournal file : open it
                 if os.path.isfile(path + '.xopp'):
                     subprocess.Popen(['/usr/bin/xournalpp', path + '.xopp'])
@@ -176,6 +188,7 @@ class QnoteroResults(QListWidget):
         except Exception as exc:
             print("qnoteroResults.OpenXournalpp(): failed to open file, sorry... %s" % exc)
 
+        self.qnotero.popDown()
 
     def SendByMail(self, item):
         """
@@ -212,9 +225,7 @@ class QnoteroResults(QListWidget):
             elif platform.system() == 'Windows':  # Windows
                 pass
             else:  # linux variants
-                home = os.path.expanduser('~')
-                path = path.replace('attachments:', '')
-                path = os.path.join(home, path)
+                path = self._attached_files_path(path)
                 # if there is already a xournal file : open it
                 subprocess.Popen(['/usr/bin/xdg-email',
                                   '--subject', zoteroItem.title,
@@ -222,6 +233,7 @@ class QnoteroResults(QListWidget):
             print("qnoteroResults.OpenXournalpp(): file opened")
         except Exception as exc:
             print("qnoteroResults.OpenXournalpp(): failed to open file, sorry... %s" % exc)
+        self.qnotero.popDown()
 
     def Clicked(self, item):
         if item is None or not hasattr(item, "zoteroItem"):
