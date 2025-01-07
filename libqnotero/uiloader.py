@@ -25,18 +25,18 @@ from libqnotero.qt import QtCore, uic
 
 
 class UiLoader(QtCore.QObject):
-    
+
     """
     desc:
         A base object from classes that dynamically load a UI file.
     """
-    
+
     def loadUi(self, ui):
-        
+
         """
         desc:
             Dynamically loads a UI file.
-            
+
         arguments:
             ui:
                 desc:   The name of a UI file, which should match.
